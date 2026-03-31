@@ -13,7 +13,9 @@ function loadData() {
         risks: [],
         training: [],
         activities: [],
-        counters: { doc: 0, proc: 0, audit: 0, nc: 0, capa: 0, risk: 0, training: 0 }
+        parts: [],
+        bom: [],
+        counters: { doc: 0, proc: 0, audit: 0, nc: 0, capa: 0, risk: 0, part: 0, training: 0 }
     };
 }
 
@@ -38,6 +40,7 @@ const pageTitles = {
     nonconformities: 'Abweichungsmanagement',
     capa: 'CAPA - Korrektur- & Vorbeugemaßnahmen',
     risks: 'Risikomanagement',
+    parts: 'Teile & ZSBs',
     training: 'Schulungsmanagement'
 };
 
@@ -549,6 +552,186 @@ function deleteRisk(id) {
     });
 }
 
+// === Parts & ZSBs ===
+let selectedZsbId = null;
+
+function savePart(e) {
+    e.preventDefault();
+    data.counters.part++;
+    // Ensure arrays exist (migration for old data)
+    if (!data.parts) data.parts = [];
+    if (!data.bom) data.bom = [];
+    const part = {
+        id: data.counters.part,
+        number: document.getElementById('partNumber').value,
+        name: document.getElementById('partName').value,
+        type: document.getElementById('partType').value,
+        drawing: document.getElementById('partDrawing').value,
+        revision: document.getElementById('partRevision').value,
+        material: document.getElementById('partMaterial').value,
+        weight: document.getElementById('partWeight').value,
+        supplier: document.getElementById('partSupplier').value,
+        customerNumber: document.getElementById('partCustomerNumber').value,
+        notes: document.getElementById('partNotes').value,
+        status: 'Aktiv',
+        created: new Date().toISOString()
+    };
+    data.parts.push(part);
+    saveData();
+    addActivity(`Teil "${part.name}" (${part.number}, ${part.type}) angelegt`);
+    closeModal('partModal');
+    renderParts();
+    updateKPIs();
+}
+
+function renderParts() {
+    if (!data.parts) data.parts = [];
+    const tbody = document.querySelector('#partsTable tbody');
+    const typeFilter = document.getElementById('partFilterType').value;
+    const statusFilter = document.getElementById('partFilterStatus').value;
+    const search = document.getElementById('partSearch').value.toLowerCase();
+
+    let parts = data.parts;
+    if (typeFilter) parts = parts.filter(p => p.type === typeFilter);
+    if (statusFilter) parts = parts.filter(p => p.status === statusFilter);
+    if (search) parts = parts.filter(p =>
+        p.number.toLowerCase().includes(search) ||
+        p.name.toLowerCase().includes(search) ||
+        (p.customerNumber && p.customerNumber.toLowerCase().includes(search))
+    );
+
+    if (parts.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Keine Teile vorhanden.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = parts.map(p => `
+        <tr>
+            <td><strong>${escapeHtml(p.number)}</strong></td>
+            <td>${escapeHtml(p.name)}</td>
+            <td><span class="part-type part-type-${p.type.toLowerCase().replace(/[^a-z]/g, '')}">${escapeHtml(p.type)}</span></td>
+            <td>${escapeHtml(p.drawing || '-')}${p.revision ? ' Rev.' + escapeHtml(p.revision) : ''}</td>
+            <td>${escapeHtml(p.material || '-')}</td>
+            <td>${escapeHtml(p.supplier || '-')}</td>
+            <td>
+                <select class="status-select" onchange="updatePartStatus(${p.id}, this.value)">
+                    <option value="Aktiv" ${p.status === 'Aktiv' ? 'selected' : ''}>Aktiv</option>
+                    <option value="Gesperrt" ${p.status === 'Gesperrt' ? 'selected' : ''}>Gesperrt</option>
+                    <option value="Auslaufend" ${p.status === 'Auslaufend' ? 'selected' : ''}>Auslaufend</option>
+                    <option value="Prototyp" ${p.status === 'Prototyp' ? 'selected' : ''}>Prototyp</option>
+                </select>
+            </td>
+            <td>
+                ${p.type === 'ZSB' ? `<button class="btn-icon" title="Stückliste" onclick="showBom(${p.id})">&#128196;</button>` : ''}
+                <button class="btn-icon" title="Löschen" onclick="deletePart(${p.id})">&#128465;</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function updatePartStatus(id, status) {
+    const part = data.parts.find(p => p.id === id);
+    part.status = status;
+    saveData();
+    addActivity(`Teil ${part.number} Status: ${status}`);
+    updateKPIs();
+}
+
+function deletePart(id) {
+    confirm('Teil löschen', 'Möchten Sie dieses Teil wirklich löschen? Stücklisten-Einträge werden ebenfalls entfernt.').then(() => {
+        const part = data.parts.find(p => p.id === id);
+        data.parts = data.parts.filter(p => p.id !== id);
+        if (!data.bom) data.bom = [];
+        data.bom = data.bom.filter(b => b.zsbId !== id && b.partId !== id);
+        if (selectedZsbId === id) {
+            selectedZsbId = null;
+            document.getElementById('bomSection').style.display = 'none';
+        }
+        saveData();
+        addActivity(`Teil "${part.name}" (${part.number}) gelöscht`);
+        renderParts();
+        updateKPIs();
+    });
+}
+
+function showBom(zsbId) {
+    if (!data.bom) data.bom = [];
+    selectedZsbId = zsbId;
+    const zsb = data.parts.find(p => p.id === zsbId);
+    document.getElementById('bomTitle').textContent = `Stückliste: ${zsb.name} (${zsb.number})`;
+    document.getElementById('bomSection').style.display = 'block';
+    populateBomSelect();
+    renderBom();
+    document.getElementById('bomSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+function populateBomSelect() {
+    const sel = document.getElementById('bomPartSelect');
+    if (!data.bom) data.bom = [];
+    const existingIds = data.bom.filter(b => b.zsbId === selectedZsbId).map(b => b.partId);
+    const available = data.parts.filter(p => p.id !== selectedZsbId && !existingIds.includes(p.id));
+    sel.innerHTML = '<option value="">Bitte wählen</option>' +
+        available.map(p => `<option value="${p.id}">${escapeHtml(p.number)} - ${escapeHtml(p.name)} (${escapeHtml(p.type)})</option>`).join('');
+}
+
+function saveBomEntry(e) {
+    e.preventDefault();
+    if (!data.bom) data.bom = [];
+    const entry = {
+        zsbId: selectedZsbId,
+        partId: parseInt(document.getElementById('bomPartSelect').value),
+        quantity: parseInt(document.getElementById('bomQuantity').value),
+        unit: document.getElementById('bomUnit').value
+    };
+    data.bom.push(entry);
+    saveData();
+    const part = data.parts.find(p => p.id === entry.partId);
+    const zsb = data.parts.find(p => p.id === selectedZsbId);
+    addActivity(`${part.number} zu Stückliste ${zsb.number} hinzugefügt (${entry.quantity} ${entry.unit})`);
+    closeModal('bomModal');
+    populateBomSelect();
+    renderBom();
+}
+
+function renderBom() {
+    if (!data.bom) data.bom = [];
+    const tbody = document.querySelector('#bomTable tbody');
+    const entries = data.bom.filter(b => b.zsbId === selectedZsbId);
+
+    if (entries.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Stückliste ist leer. Ordnen Sie Teile zu.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = entries.map((b, i) => {
+        const part = data.parts.find(p => p.id === b.partId);
+        if (!part) return '';
+        return `
+        <tr>
+            <td>${i + 1}</td>
+            <td><strong>${escapeHtml(part.number)}</strong></td>
+            <td>${escapeHtml(part.name)}</td>
+            <td>${b.quantity}</td>
+            <td>${escapeHtml(b.unit)}</td>
+            <td>
+                <button class="btn-icon" title="Entfernen" onclick="removeBomEntry(${selectedZsbId}, ${b.partId})">&#128465;</button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+function removeBomEntry(zsbId, partId) {
+    data.bom = data.bom.filter(b => !(b.zsbId === zsbId && b.partId === partId));
+    saveData();
+    addActivity('Teil aus Stückliste entfernt');
+    populateBomSelect();
+    renderBom();
+}
+
+document.getElementById('partFilterType').addEventListener('change', renderParts);
+document.getElementById('partFilterStatus').addEventListener('change', renderParts);
+document.getElementById('partSearch').addEventListener('input', renderParts);
+
 // === Training ===
 function saveTraining(e) {
     e.preventDefault();
@@ -629,6 +812,7 @@ function updateKPIs() {
 
     document.getElementById('kpiCapa').textContent = data.capa.filter(c => c.status !== 'Abgeschlossen').length;
     document.getElementById('kpiHighRisks').textContent = data.risks.filter(r => r.rpz >= 15 && r.status !== 'Geschlossen').length;
+    document.getElementById('kpiParts').textContent = (data.parts || []).length;
     document.getElementById('kpiTraining').textContent = data.training.filter(t => t.status === 'Ausstehend').length;
 }
 
@@ -660,6 +844,7 @@ function init() {
     renderCapas();
     renderRisks();
     renderRiskMatrix();
+    renderParts();
     renderTraining();
     updateKPIs();
 }

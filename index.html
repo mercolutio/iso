@@ -34,6 +34,9 @@
             <li class="nav-item" data-page="risks">
                 <span class="nav-icon">&#9878;</span> Risiken
             </li>
+            <li class="nav-item" data-page="parts">
+                <span class="nav-icon">&#9881;</span> Teile & ZSBs
+            </li>
             <li class="nav-item" data-page="training">
                 <span class="nav-icon">&#127891;</span> Schulungen
             </li>
@@ -75,6 +78,10 @@
                 <div class="kpi-card kpi-danger">
                     <div class="kpi-value" id="kpiHighRisks">0</div>
                     <div class="kpi-label">Hohe Risiken</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value" id="kpiParts">0</div>
+                    <div class="kpi-label">Teile / ZSBs</div>
                 </div>
                 <div class="kpi-card">
                     <div class="kpi-value" id="kpiTraining">0</div>
@@ -276,6 +283,68 @@
                 </thead>
                 <tbody></tbody>
             </table>
+        </section>
+
+        <!-- Teile & ZSBs -->
+        <section class="page" id="page-parts">
+            <div class="page-actions">
+                <button class="btn btn-primary" onclick="openModal('partModal')">+ Neues Teil</button>
+            </div>
+            <div class="filter-bar">
+                <select id="partFilterType">
+                    <option value="">Alle Typen</option>
+                    <option value="Einzelteil">Einzelteil</option>
+                    <option value="ZSB">ZSB (Zusammenbau)</option>
+                    <option value="Rohmaterial">Rohmaterial</option>
+                    <option value="Kaufteil">Kaufteil</option>
+                    <option value="Normteil">Normteil</option>
+                </select>
+                <select id="partFilterStatus">
+                    <option value="">Alle Status</option>
+                    <option value="Aktiv">Aktiv</option>
+                    <option value="Gesperrt">Gesperrt</option>
+                    <option value="Auslaufend">Auslaufend</option>
+                    <option value="Prototyp">Prototyp</option>
+                </select>
+                <input type="text" id="partSearch" placeholder="Teilenr. / Bezeichnung suchen...">
+            </div>
+            <table class="data-table" id="partsTable">
+                <thead>
+                    <tr>
+                        <th>Teilenr.</th>
+                        <th>Bezeichnung</th>
+                        <th>Typ</th>
+                        <th>Zeichnungs-Nr.</th>
+                        <th>Material</th>
+                        <th>Lieferant</th>
+                        <th>Status</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <div id="bomSection" style="margin-top:24px; display:none;">
+                <div class="card">
+                    <h3 id="bomTitle">Stückliste</h3>
+                    <div class="page-actions" style="margin-bottom:12px;">
+                        <button class="btn btn-sm btn-primary" onclick="openModal('bomModal')">+ Teil zuordnen</button>
+                    </div>
+                    <table class="data-table" id="bomTable">
+                        <thead>
+                            <tr>
+                                <th>Pos.</th>
+                                <th>Teilenr.</th>
+                                <th>Bezeichnung</th>
+                                <th>Menge</th>
+                                <th>Einheit</th>
+                                <th>Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
         </section>
 
         <!-- Schulungen -->
@@ -628,6 +697,114 @@
                 <div class="form-actions">
                     <button type="button" class="btn" onclick="closeModal('trainingModal')">Abbrechen</button>
                     <button type="submit" class="btn btn-primary">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Teil anlegen -->
+    <div class="modal-overlay" id="partModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Teil anlegen</h2>
+                <button class="modal-close" onclick="closeModal('partModal')">&times;</button>
+            </div>
+            <form onsubmit="savePart(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Teilenummer *</label>
+                        <input type="text" id="partNumber" required placeholder="z.B. ET-001 oder ZSB-001">
+                    </div>
+                    <div class="form-group">
+                        <label>Typ *</label>
+                        <select id="partType" required>
+                            <option value="">Bitte wählen</option>
+                            <option value="Einzelteil">Einzelteil</option>
+                            <option value="ZSB">ZSB (Zusammenbau)</option>
+                            <option value="Rohmaterial">Rohmaterial</option>
+                            <option value="Kaufteil">Kaufteil</option>
+                            <option value="Normteil">Normteil</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Bezeichnung *</label>
+                    <input type="text" id="partName" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Zeichnungs-Nr.</label>
+                        <input type="text" id="partDrawing" placeholder="z.B. ZN-2026-0001">
+                    </div>
+                    <div class="form-group">
+                        <label>Revision</label>
+                        <input type="text" id="partRevision" value="A" placeholder="z.B. A, B, C">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Material</label>
+                        <input type="text" id="partMaterial" placeholder="z.B. Stahl 1.4301">
+                    </div>
+                    <div class="form-group">
+                        <label>Gewicht (g)</label>
+                        <input type="number" id="partWeight" step="0.01" placeholder="z.B. 125.5">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Lieferant</label>
+                        <input type="text" id="partSupplier">
+                    </div>
+                    <div class="form-group">
+                        <label>Kundenteile-Nr.</label>
+                        <input type="text" id="partCustomerNumber" placeholder="OEM-Teilenummer">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Bemerkungen</label>
+                    <textarea id="partNotes" rows="2"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="closeModal('partModal')">Abbrechen</button>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- BOM Zuordnung -->
+    <div class="modal-overlay" id="bomModal">
+        <div class="modal modal-small">
+            <div class="modal-header">
+                <h2>Teil zuordnen</h2>
+                <button class="modal-close" onclick="closeModal('bomModal')">&times;</button>
+            </div>
+            <form onsubmit="saveBomEntry(event)">
+                <div class="form-group">
+                    <label>Teil auswählen *</label>
+                    <select id="bomPartSelect" required>
+                        <option value="">Bitte wählen</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Menge *</label>
+                        <input type="number" id="bomQuantity" required min="1" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Einheit</label>
+                        <select id="bomUnit">
+                            <option value="Stk">Stk</option>
+                            <option value="m">m</option>
+                            <option value="kg">kg</option>
+                            <option value="l">l</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="closeModal('bomModal')">Abbrechen</button>
+                    <button type="submit" class="btn btn-primary">Zuordnen</button>
                 </div>
             </form>
         </div>

@@ -421,6 +421,48 @@ body {
     color: var(--primary);
 }
 
+/* === Part Type Badges === */
+.part-type {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.part-type-zsb {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.part-type-einzelteil {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.part-type-rohmaterial {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.part-type-kaufteil {
+    background: #ede9fe;
+    color: #5b21b6;
+}
+
+.part-type-normteil {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.status-select {
+    padding: 4px 8px;
+    border: 1px solid var(--gray-300);
+    border-radius: 4px;
+    font-size: 13px;
+    background: white;
+}
+
 /* === Process Grid === */
 .process-grid {
     display: grid;
