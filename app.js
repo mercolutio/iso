@@ -53,11 +53,20 @@ navItems.forEach(item => {
         document.getElementById('page-' + page).classList.add('active');
         pageTitle.textContent = pageTitles[page] || page;
         sidebar.classList.remove('open');
+        sidebarBackdrop.classList.remove('active');
     });
 });
 
+const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
 menuToggle.addEventListener('click', () => {
     sidebar.classList.toggle('open');
+    sidebarBackdrop.classList.toggle('active');
+});
+
+sidebarBackdrop.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    sidebarBackdrop.classList.remove('active');
 });
 
 // === Modal helpers ===
