@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QM-System | ISO 9001:2026 Automotive</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">Q</div>
+            <span class="logo-text">QM Automotive</span>
+        </div>
+        <ul class="nav-list">
+            <li class="nav-item active" data-page="dashboard">
+                <span class="nav-icon">&#9632;</span> Dashboard
+            </li>
+            <li class="nav-item" data-page="documents">
+                <span class="nav-icon">&#128196;</span> Dokumente
+            </li>
+            <li class="nav-item" data-page="processes">
+                <span class="nav-icon">&#9881;</span> Prozesse
+            </li>
+            <li class="nav-item" data-page="audits">
+                <span class="nav-icon">&#128269;</span> Audits
+            </li>
+            <li class="nav-item" data-page="nonconformities">
+                <span class="nav-icon">&#9888;</span> Abweichungen
+            </li>
+            <li class="nav-item" data-page="capa">
+                <span class="nav-icon">&#128736;</span> CAPA
+            </li>
+            <li class="nav-item" data-page="risks">
+                <span class="nav-icon">&#9878;</span> Risiken
+            </li>
+            <li class="nav-item" data-page="training">
+                <span class="nav-icon">&#127891;</span> Schulungen
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <small>ISO 9001:2026</small>
+        </div>
+    </nav>
+
+    <main class="main-content" id="mainContent">
+        <header class="top-bar">
+            <button class="menu-toggle" id="menuToggle">&#9776;</button>
+            <h1 id="pageTitle">Dashboard</h1>
+            <div class="top-bar-right">
+                <span class="badge" id="openIssuesBadge" title="Offene Abweichungen">0</span>
+                <span class="user-info">QM-Beauftragter</span>
+            </div>
+        </header>
+
+        <!-- Dashboard -->
+        <section class="page active" id="page-dashboard">
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-value" id="kpiDocuments">0</div>
+                    <div class="kpi-label">Dokumente</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value" id="kpiAudits">0</div>
+                    <div class="kpi-label">Geplante Audits</div>
+                </div>
+                <div class="kpi-card kpi-warning">
+                    <div class="kpi-value" id="kpiNC">0</div>
+                    <div class="kpi-label">Offene Abweichungen</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value" id="kpiCapa">0</div>
+                    <div class="kpi-label">Laufende CAPA</div>
+                </div>
+                <div class="kpi-card kpi-danger">
+                    <div class="kpi-value" id="kpiHighRisks">0</div>
+                    <div class="kpi-label">Hohe Risiken</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value" id="kpiTraining">0</div>
+                    <div class="kpi-label">Ausstehende Schulungen</div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h3>Letzte Aktivitäten</h3>
+                    <ul class="activity-list" id="activityList">
+                        <li class="empty-state">Noch keine Aktivitäten vorhanden.</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>ISO 9001:2026 Kapitelübersicht</h3>
+                    <div class="chapter-list">
+                        <div class="chapter-item">
+                            <span class="chapter-num">4</span>
+                            <span>Kontext der Organisation</span>
+                        </div>
+                        <div class="chapter-item">
+                            <span class="chapter-num">5</span>
+                            <span>Führung</span>
+                        </div>
+                        <div class="chapter-item">
+                            <span class="chapter-num">6</span>
+                            <span>Planung</span>
+                        </div>
+                        <div class="chapter-item">
+                            <span class="chapter-num">7</span>
+                            <span>Unterstützung</span>
+                        </div>
+                        <div class="chapter-item">
+                            <span class="chapter-num">8</span>
+                            <span>Betrieb</span>
+                        </div>
+                        <div class="chapter-item">
+                            <span class="chapter-num">9</span>
+                            <span>Bewertung der Leistung</span>
+                        </div>
+                        <div class="chapter-item">
+                            <span class="chapter-num">10</span>
+                            <span>Verbesserung</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dokumente -->
+        <section class="page" id="page-documents">
+            <div class="page-actions">
+                <button class="btn btn-primary" onclick="openModal('documentModal')">+ Neues Dokument</button>
+            </div>
+            <div class="filter-bar">
+                <select id="docFilterType">
+                    <option value="">Alle Typen</option>
+                    <option value="QM-Handbuch">QM-Handbuch</option>
+                    <option value="Verfahrensanweisung">Verfahrensanweisung</option>
+                    <option value="Arbeitsanweisung">Arbeitsanweisung</option>
+                    <option value="Formblatt">Formblatt</option>
+                    <option value="Prüfanweisung">Prüfanweisung</option>
+                </select>
+                <input type="text" id="docSearch" placeholder="Suchen...">
+            </div>
+            <table class="data-table" id="documentsTable">
+                <thead>
+                    <tr>
+                        <th>Dok-Nr.</th>
+                        <th>Titel</th>
+                        <th>Typ</th>
+                        <th>Version</th>
+                        <th>ISO-Kapitel</th>
+                        <th>Status</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <!-- Prozesse -->
+        <section class="page" id="page-processes">
+            <div class="page-actions">
+                <button class="btn btn-primary" onclick="openModal('processModal')">+ Neuer Prozess</button>
+            </div>
+            <div class="process-grid" id="processGrid"></div>
+        </section>
+
+        <!-- Audits -->
+        <section class="page" id="page-audits">
+            <div class="page-actions">
+                <button class="btn btn-primary" onclick="openModal('auditModal')">+ Neues Audit</button>
+            </div>
+            <table class="data-table" id="auditsTable">
+                <thead>
+                    <tr>
+                        <th>Audit-Nr.</th>
+                        <th>Typ</th>
+                        <th>Bereich</th>
+                        <th>Datum</th>
+                        <th>Auditor</th>
+                        <th>Status</th>
+                        <th>Feststellungen</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <!-- Abweichungen -->
+        <section class="page" id="page-nonconformities">
+            <div class="page-actions">
+                <button class="btn btn-primary" onclick="openModal('ncModal')">+ Neue Abweichung</button>
+            </div>
+            <div class="filter-bar">
+                <select id="ncFilterSeverity">
+                    <option value="">Alle Schweregrade</option>
+                    <option value="Kritisch">Kritisch</option>
+                    <option value="Schwerwiegend">Schwerwiegend</option>
+                    <option value="Geringfügig">Geringfügig</option>
+                </select>
+                <select id="ncFilterStatus">
+                    <option value="">Alle Status</option>
+                    <option value="Offen">Offen</option>
+                    <option value="In Bearbeitung">In Bearbeitung</option>
+                    <option value="Abgeschlossen">Abgeschlossen</option>
+                </select>
+            </div>
+            <table class="data-table" id="ncTable">
+                <thead>
+                    <tr>
+                        <th>NC-Nr.</th>
+                        <th>Beschreibung</th>
+                        <th>Bereich</th>
+                        <th>Schweregrad</th>
+                        <th>Sofortmaßnahme</th>
+                        <th>Status</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <!-- CAPA -->
+        <section class="page" id="page-capa">
+            <div class="page-actions">
+                <button class="btn btn-primary" onclick="openModal('capaModal')">+ Neue CAPA</button>
+            </div>
+            <table class="data-table" id="capaTable">
+                <thead>
+                    <tr>
+                        <th>CAPA-Nr.</th>
+                        <th>Typ</th>
+                        <th>Bezug</th>
+                        <th>Ursachenanalyse</th>
+                        <th>Maßnahme</th>
+                        <th>Verantwortlich</th>
+                        <th>Fällig am</th>
+                        <th>Status</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <!-- Risiken -->
+        <section class="page" id="page-risks">
+            <div class="page-actions">
+                <button class="btn btn-primary" onclick="openModal('riskModal')">+ Neues Risiko</button>
+            </div>
+            <div class="risk-matrix-container">
+                <h3>Risikomatrix</h3>
+                <div class="risk-matrix" id="riskMatrix">
+                    <div class="matrix-y-label">Auswirkung</div>
+                    <div class="matrix-x-label">Eintrittswahrscheinlichkeit</div>
+                    <div class="matrix-grid">
+                        <!-- 5x5 matrix cells generated by JS -->
+                    </div>
+                </div>
+            </div>
+            <table class="data-table" id="risksTable">
+                <thead>
+                    <tr>
+                        <th>R-Nr.</th>
+                        <th>Risiko</th>
+                        <th>Prozess</th>
+                        <th>Wahrscheinlichkeit</th>
+                        <th>Auswirkung</th>
+                        <th>RPZ</th>
+                        <th>Maßnahme</th>
+                        <th>Status</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <!-- Schulungen -->
+        <section class="page" id="page-training">
+            <div class="page-actions">
+                <button class="btn btn-primary" onclick="openModal('trainingModal')">+ Neue Schulung</button>
+            </div>
+            <table class="data-table" id="trainingTable">
+                <thead>
+                    <tr>
+                        <th>S-Nr.</th>
+                        <th>Thema</th>
+                        <th>Teilnehmer</th>
+                        <th>Datum</th>
+                        <th>Trainer</th>
+                        <th>Status</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+    </main>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="documentModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Dokument anlegen</h2>
+                <button class="modal-close" onclick="closeModal('documentModal')">&times;</button>
+            </div>
+            <form onsubmit="saveDocument(event)">
+                <div class="form-group">
+                    <label>Titel *</label>
+                    <input type="text" id="docTitle" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Typ *</label>
+                        <select id="docType" required>
+                            <option value="">Bitte wählen</option>
+                            <option value="QM-Handbuch">QM-Handbuch</option>
+                            <option value="Verfahrensanweisung">Verfahrensanweisung</option>
+                            <option value="Arbeitsanweisung">Arbeitsanweisung</option>
+                            <option value="Formblatt">Formblatt</option>
+                            <option value="Prüfanweisung">Prüfanweisung</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Version</label>
+                        <input type="text" id="docVersion" value="1.0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>ISO 9001 Kapitel</label>
+                    <select id="docChapter">
+                        <option value="">Kein Bezug</option>
+                        <option value="4">4 - Kontext der Organisation</option>
+                        <option value="5">5 - Führung</option>
+                        <option value="6">6 - Planung</option>
+                        <option value="7">7 - Unterstützung</option>
+                        <option value="8">8 - Betrieb</option>
+                        <option value="9">9 - Bewertung der Leistung</option>
+                        <option value="10">10 - Verbesserung</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Beschreibung</label>
+                    <textarea id="docDescription" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="closeModal('documentModal')">Abbrechen</button>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="processModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Prozess anlegen</h2>
+                <button class="modal-close" onclick="closeModal('processModal')">&times;</button>
+            </div>
+            <form onsubmit="saveProcess(event)">
+                <div class="form-group">
+                    <label>Prozessname *</label>
+                    <input type="text" id="processName" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Kategorie *</label>
+                        <select id="processCategory" required>
+                            <option value="">Bitte wählen</option>
+                            <option value="Führungsprozess">Führungsprozess</option>
+                            <option value="Kernprozess">Kernprozess</option>
+                            <option value="Unterstützungsprozess">Unterstützungsprozess</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Verantwortlich *</label>
+                        <input type="text" id="processOwner" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Eingaben</label>
+                    <input type="text" id="processInputs" placeholder="Kommagetrennt">
+                </div>
+                <div class="form-group">
+                    <label>Ergebnisse</label>
+                    <input type="text" id="processOutputs" placeholder="Kommagetrennt">
+                </div>
+                <div class="form-group">
+                    <label>Kennzahlen</label>
+                    <input type="text" id="processKPIs" placeholder="Kommagetrennt">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="closeModal('processModal')">Abbrechen</button>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="auditModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Audit anlegen</h2>
+                <button class="modal-close" onclick="closeModal('auditModal')">&times;</button>
+            </div>
+            <form onsubmit="saveAudit(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Audit-Typ *</label>
+                        <select id="auditType" required>
+                            <option value="">Bitte wählen</option>
+                            <option value="Internes Audit">Internes Audit</option>
+                            <option value="Prozessaudit">Prozessaudit</option>
+                            <option value="Produktaudit">Produktaudit</option>
+                            <option value="Systemaudit">Systemaudit</option>
+                            <option value="Lieferantenaudit">Lieferantenaudit</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Bereich *</label>
+                        <input type="text" id="auditArea" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Datum *</label>
+                        <input type="date" id="auditDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Auditor *</label>
+                        <input type="text" id="auditAuditor" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Bemerkungen</label>
+                    <textarea id="auditNotes" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="closeModal('auditModal')">Abbrechen</button>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="ncModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Abweichung erfassen</h2>
+                <button class="modal-close" onclick="closeModal('ncModal')">&times;</button>
+            </div>
+            <form onsubmit="saveNC(event)">
+                <div class="form-group">
+                    <label>Beschreibung *</label>
+                    <textarea id="ncDescription" rows="3" required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Bereich *</label>
+                        <input type="text" id="ncArea" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Schweregrad *</label>
+                        <select id="ncSeverity" required>
+                            <option value="">Bitte wählen</option>
+                            <option value="Kritisch">Kritisch</option>
+                            <option value="Schwerwiegend">Schwerwiegend</option>
+                            <option value="Geringfügig">Geringfügig</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Sofortmaßnahme</label>
+                    <textarea id="ncImmediate" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Entdeckt bei</label>
+                    <select id="ncSource">
+                        <option value="Audit">Audit</option>
+                        <option value="Kundenreklamation">Kundenreklamation</option>
+                        <option value="Interne Prüfung">Interne Prüfung</option>
+                        <option value="Wareneingang">Wareneingang</option>
+                        <option value="Produktion">Produktion</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="closeModal('ncModal')">Abbrechen</button>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="capaModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>CAPA anlegen</h2>
+                <button class="modal-close" onclick="closeModal('capaModal')">&times;</button>
+            </div>
+            <form onsubmit="saveCapa(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Typ *</label>
+                        <select id="capaType" required>
+                            <option value="">Bitte wählen</option>
+                            <option value="Korrekturmaßnahme">Korrekturmaßnahme</option>
+                            <option value="Vorbeugemaßnahme">Vorbeugemaßnahme</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Bezug</label>
+                        <input type="text" id="capaReference" placeholder="z.B. NC-001">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Ursachenanalyse (5-Why / Ishikawa) *</label>
+                    <textarea id="capaRootCause" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Maßnahme *</label>
+                    <textarea id="capaAction" rows="3" required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Verantwortlich *</label>
+                        <input type="text" id="capaResponsible" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Fällig am *</label>
+                        <input type="date" id="capaDueDate" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Wirksamkeitsprüfung</label>
+                    <textarea id="capaEffectiveness" rows="2" placeholder="Wie wird die Wirksamkeit überprüft?"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="closeModal('capaModal')">Abbrechen</button>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="riskModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Risiko erfassen</h2>
+                <button class="modal-close" onclick="closeModal('riskModal')">&times;</button>
+            </div>
+            <form onsubmit="saveRisk(event)">
+                <div class="form-group">
+                    <label>Risikobeschreibung *</label>
+                    <textarea id="riskDescription" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Betroffener Prozess</label>
+                    <input type="text" id="riskProcess">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Eintrittswahrscheinlichkeit (1-5) *</label>
+                        <select id="riskProbability" required>
+                            <option value="">Bitte wählen</option>
+                            <option value="1">1 - Sehr gering</option>
+                            <option value="2">2 - Gering</option>
+                            <option value="3">3 - Mittel</option>
+                            <option value="4">4 - Hoch</option>
+                            <option value="5">5 - Sehr hoch</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Auswirkung (1-5) *</label>
+                        <select id="riskImpact" required>
+                            <option value="">Bitte wählen</option>
+                            <option value="1">1 - Sehr gering</option>
+                            <option value="2">2 - Gering</option>
+                            <option value="3">3 - Mittel</option>
+                            <option value="4">4 - Hoch</option>
+                            <option value="5">5 - Sehr hoch</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Risikominderungsmaßnahme</label>
+                    <textarea id="riskMitigation" rows="2"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="closeModal('riskModal')">Abbrechen</button>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="trainingModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Schulung anlegen</h2>
+                <button class="modal-close" onclick="closeModal('trainingModal')">&times;</button>
+            </div>
+            <form onsubmit="saveTraining(event)">
+                <div class="form-group">
+                    <label>Thema *</label>
+                    <input type="text" id="trainingTopic" required>
+                </div>
+                <div class="form-group">
+                    <label>Teilnehmer *</label>
+                    <input type="text" id="trainingParticipants" required placeholder="Kommagetrennt">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Datum *</label>
+                        <input type="date" id="trainingDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Trainer *</label>
+                        <input type="text" id="trainingTrainer" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Inhalte</label>
+                    <textarea id="trainingContent" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="closeModal('trainingModal')">Abbrechen</button>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirm Dialog -->
+    <div class="modal-overlay" id="confirmDialog">
+        <div class="modal modal-small">
+            <div class="modal-header">
+                <h2 id="confirmTitle">Bestätigung</h2>
+            </div>
+            <p id="confirmMessage"></p>
+            <div class="form-actions">
+                <button class="btn" onclick="closeModal('confirmDialog')">Abbrechen</button>
+                <button class="btn btn-danger" id="confirmAction">Löschen</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
